@@ -26,15 +26,16 @@ import java.util.Properties;
  * @author bhagc
  */
 public class AppConfiguration {
-    private final static String APP_PROPERTIES_FILE_NAME="app.properties";
-    private static Properties appProps=null;
-    
-    public static Properties getConfig()throws FileNotFoundException,IOException{
-        if(appProps==null){
-            String rootPath=Thread.currentThread().getContextClassLoader().getResource("").getPath();
+
+    private final static String APP_PROPERTIES_FILE_NAME = "resources.properties";
+    private static Properties appProps = null;
+
+    public static Properties getConfig() throws FileNotFoundException, IOException {
+        if (appProps == null) {
+            String rootPath = Thread.currentThread().getContextClassLoader().getResource(APP_PROPERTIES_FILE_NAME).getPath();
             System.out.print(rootPath);
-            String appConfigPath=rootPath+APP_PROPERTIES_FILE_NAME;
-            appProps=new Properties();
+            String appConfigPath = rootPath;
+            appProps = new Properties();
             appProps.load(new FileInputStream(appConfigPath));
         }
         return appProps;

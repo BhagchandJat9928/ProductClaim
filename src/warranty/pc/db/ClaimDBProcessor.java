@@ -18,7 +18,6 @@ package warranty.pc.db;
 
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,61 +30,61 @@ import warranty.pc.model.Claim;
  * @author bhagc
  */
 public class ClaimDBProcessor {
-    
-    private static final Logger LOGGER=Logger.getLogger(ClaimDBProcessor.class.getName());
-    private static final String NEW_STATUS="NEW";
+
+    private static final Logger LOGGER = Logger.getLogger(ClaimDBProcessor.class.getName());
+    private static final String NEW_STATUS = "NEW";
     private final Connection conn;
-    
-    public ClaimDBProcessor(Connection dbConnection)throws Exception{
-        if(dbConnection==null){
+
+    public ClaimDBProcessor(Connection dbConnection) throws Exception {
+        if (dbConnection == null) {
             throw new Exception("Database Connection is NULL");
         }
-        conn=dbConnection;
+        conn = dbConnection;
     }
-    
-    public void saveClaims(List<Claim> claimList){
-        if(claimList==null){
-            LOGGER.log(Level.WARNING,"Claim list was null, cannot save them to database");
-            return ;
+
+    public void saveClaims(List<Claim> claimList) {
+        if (claimList == null) {
+            LOGGER.log(Level.WARNING, "Claim list was null, cannot save them to database");
+            return;
         }
-        claimList.forEach(c->save(c));
-        LOGGER.log(Level.FINEST,"All claims saved");
+        claimList.forEach(c -> save(c));
+        LOGGER.log(Level.FINEST, "All claims saved");
     }
-    
-    private void save(Claim claim){
-       
+
+    private void save(Claim claim) {
+
         //if the rest data augementation failed ,then the country information is not available
-        String sql="insert into Claim"
-                +"(CLAIM_ID,CUSTOMER_ID,CUTOMER_FIRSTNAME,CUSTOMER_LASTNAME,"
+        String sql = "insert into Claim"
+                + "(CLAIM_ID,CUSTOMER_ID,CUTOMER_FIRSTNAME,CUSTOMER_LASTNAME,"
                 + "CUTOMER_EMAIL,PRODUCT_ID,PRODUCT_NAME,SERIAL_NUMBER,"
                 + "WARRANTY_NUMBER,COUNTRY_CODE,COUNTRY_REGION,STATUS,CLAIM_DATE,SUBJECT,SUMMARY"
-        +"values(CLAIM_SEQ.NEXTVAL,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        
-        String returnCols[]={"CLAIM_ID"};
-        
-        try(PreparedStatement st=conn.prepareStatement(sql,returnCols)){
-          st.setString(1, claim.getCustomerId());
-          st.setString(2, claim.getCustomerName());
-          st.setString(3, claim.getCustomerLastName());
-          st.setString(4, claim.getCustomerEmail());
-          st.setInt(5, claim.getProductId());
-          st.setString(6, claim.getProductName());
-          st.setString(7, claim.getSerialNumber());
-          st.setInt(8,claim.getWarranty().getWarrantyNumber());
+                + "values(CLAIM_SEQ.NEXTVAL,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-        String countryCode=claim.getCountry()!=null?claim.getCountry().getAlpha3Code():null;
-        String countryRegion=claim.getCountry()!=null?claim.getCountry().getRegion():null;
-        st.setString(9, countryCode);
-        st.setString(10, countryRegion);
-        st.setDate(11, Date.valueOf(claim.getClaimDate()));
-        st.setString(12, NEW_STATUS);
-               st.setString(13, claim.getSubject());
-          st.setString(14, claim.getSummary());
+        String returnCols[] = {"CLAIM_ID"};
+
+        try (PreparedStatement st = conn.prepareStatement(sql, returnCols)) {
+            st.setString(1, claim.getCustomerId());
+            st.setString(2, claim.getCustomerName());
+            st.setString(3, claim.getCustomerLastName());
+            st.setString(4, claim.getCustomerEmail());
+            st.setInt(5, claim.getProductId());
+            st.setString(6, claim.getProductName());
+            st.setString(7, claim.getSerialNumber());
+            st.setInt(8, claim.getWarranty().getWarrantyNumber());
+
+            String countryCode = claim.getCountry() != null ? claim.getCountry().getAlpha3Code() : null;
+            String countryRegion = claim.getCountry() != null ? claim.getCountry().getRegion() : null;
+            st.setString(9, countryCode);
+            st.setString(10, countryRegion);
+            st.setDate(11, Date.valueOf(claim.getClaimDate()));
+            st.setString(12, NEW_STATUS);
+            st.setString(13, claim.getSubject());
+            st.setString(14, claim.getSummary());
             st.executeQuery();
-            LOGGER.log(Level.FINEST,"Claim saved to database:{0}",claim);
-      } catch (SQLException ex) {  
-            LOGGER.log(Level.WARNING,"Error while saving claim:{0}",claim);
-        }  
+            LOGGER.log(Level.FINEST, "Claim saved to database:{0}", claim);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.WARNING, "Error while saving claim:{0}", claim);
+        }
     }
-    
+
 }

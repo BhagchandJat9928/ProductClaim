@@ -17,12 +17,11 @@
 package warranty.pc.db;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.logging.Level;
-import oracle.ucp.jdbc.PoolDataSource;
 import java.util.logging.Logger;
-import oracle.ucp.jdbc.PoolDataSourceFactory;
 
 /**
  *
@@ -31,7 +30,7 @@ import oracle.ucp.jdbc.PoolDataSourceFactory;
 public class WarrantyDatabase {
 
     private static final Logger LOGGER = Logger.getLogger(WarrantyDatabase.class.getName());
-    private static final String CONN_FACTORY_CLASS_NAME = "oracle.jdbc.pool.OracleDataSource";
+    private static final String CONN_FACTORY_CLASS_NAME = "com.mysql.jdbc.Driver"; //"oracle.jdbc.pool.OracleDataSource";
     private Connection conn;
 
     public WarrantyDatabase(String dbURL, String username, String password) throws Exception {
@@ -47,39 +46,52 @@ public class WarrantyDatabase {
 
     private void setupDatabase(String dbURL, String dbUsername, String dbPassword) {
         //Get the PoolDataSource for UCP
-        PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
+        // PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
 
         //set the connection factory first befor all other properties
         try {
-            pds.setConnectionFactoryClassName(CONN_FACTORY_CLASS_NAME);
+            Class.forName(CONN_FACTORY_CLASS_NAME);
+            conn = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
 
-            //set the jdbc connection properties after pool has been created
-            pds.setURL(dbURL);
-            pds.setPassword(dbPassword);
-            pds.setUser(dbUsername);
-            pds.setConnectionPoolName("JDBC_UDP_POOL");
-            pds.setInitialPoolSize(5);
-            pds.setMinPoolSize(5);
-            pds.setMaxPoolSize(20);
-            pds.setTimeoutCheckInterval(5);
-            pds.setInactiveConnectionTimeout(10);
+            String createTable = "create table Claim if not exists(CLAIM_ID varchar(50),CUSTOMER_ID  varchar(50),"
+                    + "CUTOMER_FIRSTNAME varchar(50),CUSTOMER_LASTNAME varchar(50),"
+                    + "CUTOMER_EMAIL,PRODUCT_ID varchar(50),PRODUCT_NAME varchar(50),SERIAL_NUMBER varchar(50),"
+                    + "WARRANTY_NUMBER integer,COUNTRY_CODE varchar(50),COUNTRY_REGION varchar(50),STATUS varchar(50),"
+                    + "CLAIM_DATE Date,SUBJECT varchar(50),SUMMARY varchar(50))";
+            PreparedStatement st = conn.prepareStatement(createTable);
+            st.execute();
 
-           
-           Properties connProps=new Properties();
-           connProps.setProperty("fixedString", "false");
-           connProps.setProperty("remarksReporting", "false");
-           connProps.setProperty("includeSynonyms", "false");
-           connProps.setProperty("restrictGetTables", "false");
-           connProps.setProperty("defaultNChar", "false");
-           connProps.setProperty("AccumulateBatchResult", "false");
-           
-            //jdbc connection properties will be set on the provided 
-            //connection factory
-            pds.setConnectionProperties(connProps);
-            conn=pds.getConnection();
-            LOGGER.log(Level.FINEST,"Configured database");
+//            pds.setConnectionFactoryClassName(CONN_FACTORY_CLASS_NAME);
+//
+//            //set the jdbc connection properties after pool has been created
+//            pds.setURL(dbURL);
+//            pds.setPassword(dbPassword);
+//            pds.setUser(dbUsername);
+//            pds.setConnectionPoolName("JDBC_UDP_POOL");
+//            pds.setInitialPoolSize(5);
+//            pds.setMinPoolSize(5);
+//            pds.setMaxPoolSize(20);
+//            pds.setTimeoutCheckInterval(5);
+//            pds.setInactiveConnectionTimeout(10);
+//
+//
+//           Properties connProps=new Properties();
+//           connProps.setProperty("fixedString", "false");
+//           connProps.setProperty("remarksReporting", "false");
+//           connProps.setProperty("includeSynonyms", "false");
+//           connProps.setProperty("restrictGetTables", "false");
+//           connProps.setProperty("defaultNChar", "false");
+//           connProps.setProperty("AccumulateBatchResult", "false");
+//
+//            //jdbc connection properties will be set on the provided
+//            //connection factory
+//            pds.setConnectionProperties(connProps);
+//            conn=pds.getConnection();
+            LOGGER.log(Level.FINEST, "Configured database");
         } catch (SQLException ex) {
-            LOGGER.log(Level.INFO, "Error while setting up Database",ex);
+            LOGGER.log(Level.INFO, "Error while setting up Database", ex);
+        } catch (ClassNotFoundException ex) {
+            LOGGER.log(Level.INFO, "Mysql class Not found", ex);
         }
     }
 

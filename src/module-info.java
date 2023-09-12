@@ -18,8 +18,8 @@
 module ProductClaim {
     requires java.logging;
     requires java.sql;
-    requires com.oracle.database.ucp;
     requires java.ws.rs ;
     requires spring.webmvc;
-   
+
+
 }
