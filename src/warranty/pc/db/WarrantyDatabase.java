@@ -53,7 +53,7 @@ public class WarrantyDatabase {
             Class.forName(CONN_FACTORY_CLASS_NAME);
             conn = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
 
-            String createTable = "create table Claim if not exists(CLAIM_ID varchar(50),CUSTOMER_ID  varchar(50),"
+            String createTable = "create table if not exists Claim(CLAIM_ID varchar(50) PRIMARY KEY,CUSTOMER_ID  varchar(50),"
                     + "CUTOMER_FIRSTNAME varchar(50),CUSTOMER_LASTNAME varchar(50),"
                     + "CUTOMER_EMAIL,PRODUCT_ID varchar(50),PRODUCT_NAME varchar(50),SERIAL_NUMBER varchar(50),"
                     + "WARRANTY_NUMBER integer,COUNTRY_CODE varchar(50),COUNTRY_REGION varchar(50),STATUS varchar(50),"
