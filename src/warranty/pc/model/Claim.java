@@ -24,20 +24,18 @@ import java.time.LocalDate;
  */
 public class Claim {
 
-    private  String customerId;
-    private  String customerName;
-    private  String customerLastName;
-    private  String customerEmail;
-    private  Integer productId;
-    private  String productName;
-    private  String serialNumber;
-    private  LocalDate claimDate;
-    private  String subject;
-    private  String summary;
+    private String customerId;
+    private String customerName;
+    private String customerLastName;
+    private String customerEmail;
+    private Integer productId;
+    private String productName;
+    private String serialNumber;
+    private LocalDate claimDate;
+    private String subject;
+    private String summary;
     private Warranty warranty;
     private Country country;
-
-
 
     @Override
     public String toString() {
@@ -150,8 +148,5 @@ public class Claim {
     public void setCountry(Country country) {
         this.country = country;
     }
-
-   
-
 
 }

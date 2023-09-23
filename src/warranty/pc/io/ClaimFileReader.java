@@ -40,7 +40,7 @@ import warranty.pc.model.Claim;
  */
 public class ClaimFileReader {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH);
     private final MessageFormat claimFormat;
     private List<String> failedRecords;
     private static final Logger LOGGER = Logger.getLogger(ClaimFileReader.class.getName());
@@ -50,10 +50,11 @@ public class ClaimFileReader {
     }
 
     public List<Claim> readClaims(String fileName) {
+        System.out.println(fileName);
         List<Claim> claims = new ArrayList<>();
         failedRecords = new ArrayList<>();
 
-        if (Files.notExists(Path.of(fileName))) {
+        if (Files.notExists(Path.of(fileName).normalize())) {
             try {
                 Files.createDirectories(Path.of(fileName).getParent());
                 Files.createFile(Path.of(fileName));
@@ -69,14 +70,17 @@ public class ClaimFileReader {
                     .map(line -> {
                         Object[] values = parseData(line);
                         if (values != null) {
+
                             Claim claim = new Claim();
                             claim.setCustomerId((String) values[0]);
                             claim.setCustomerName((String) values[1]);
                             claim.setCustomerLastName((String) values[2]);
                             claim.setCustomerEmail((String) values[3]);
+
                             claim.setProductId(Integer.valueOf((String) values[4]));
                             claim.setProductName((String) values[5]);
                             claim.setSerialNumber((String) values[6]);
+
                             claim.setClaimDate(LocalDate.parse((String) values[7], formatter));
                             claim.setSubject((String) values[8]);
                             claim.setSummary((String) values[9]);

@@ -33,10 +33,9 @@ public class AppConfiguration {
     public static Properties getConfig() throws FileNotFoundException, IOException {
         if (appProps == null) {
             String rootPath = Thread.currentThread().getContextClassLoader().getResource(APP_PROPERTIES_FILE_NAME).getPath();
-            System.out.print(rootPath);
-            String appConfigPath = rootPath;
+
             appProps = new Properties();
-            appProps.load(new FileInputStream(appConfigPath));
+            appProps.load(new FileInputStream(rootPath));
         }
         return appProps;
     }

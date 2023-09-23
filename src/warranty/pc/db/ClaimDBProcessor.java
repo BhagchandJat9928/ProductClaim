@@ -54,15 +54,13 @@ public class ClaimDBProcessor {
     private void save(Claim claim) {
 
         //if the rest data augementation failed ,then the country information is not available
-        String sql = "insert into Claim"
-                + "(CLAIM_ID,CUSTOMER_ID,CUTOMER_FIRSTNAME,CUSTOMER_LASTNAME,"
+        String sql = "insert into Claim "
+                + "(CUSTOMER_ID,CUTOMER_FIRSTNAME,CUSTOMER_LASTNAME,"
                 + "CUTOMER_EMAIL,PRODUCT_ID,PRODUCT_NAME,SERIAL_NUMBER,"
-                + "WARRANTY_NUMBER,COUNTRY_CODE,COUNTRY_REGION,STATUS,CLAIM_DATE,SUBJECT,SUMMARY"
-                + "values(CLAIM_SEQ.NEXTVAL,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-        String returnCols[] = {"CLAIM_ID"};
-
-        try (PreparedStatement st = conn.prepareStatement(sql, returnCols)) {
+                + "WARRANTY_NUMBER,COUNTRY_CODE,COUNTRY_REGION,STATUS,CLAIM_DATE,SUBJECT,SUMMARY)"
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        // String returnCols[] = {"CLAIM_ID"};
+        try (PreparedStatement st = conn.prepareStatement(sql)) {
             st.setString(1, claim.getCustomerId());
             st.setString(2, claim.getCustomerName());
             st.setString(3, claim.getCustomerLastName());
@@ -72,18 +70,20 @@ public class ClaimDBProcessor {
             st.setString(7, claim.getSerialNumber());
             st.setInt(8, claim.getWarranty().getWarrantyNumber());
 
-            String countryCode = claim.getCountry() != null ? claim.getCountry().getAlpha3Code() : null;
-            String countryRegion = claim.getCountry() != null ? claim.getCountry().getRegion() : null;
+            String countryCode = claim.getCountry() != null ? claim.getCountry().getAlpha3Code() : "+91";
+            String countryRegion = claim.getCountry() != null ? claim.getCountry().getRegion() : "kolkata";
             st.setString(9, countryCode);
             st.setString(10, countryRegion);
-            st.setDate(11, Date.valueOf(claim.getClaimDate()));
-            st.setString(12, NEW_STATUS);
+            st.setString(11, NEW_STATUS);
+            st.setDate(12, Date.valueOf(claim.getClaimDate()));
             st.setString(13, claim.getSubject());
             st.setString(14, claim.getSummary());
-            st.executeQuery();
-            LOGGER.log(Level.FINEST, "Claim saved to database:{0}", claim);
+            st.executeUpdate();
+            LOGGER.log(Level.INFO, "Claim saved to database:{0}", claim);
         } catch (SQLException ex) {
             LOGGER.log(Level.WARNING, "Error while saving claim:{0}", claim);
+            LOGGER.warning(ex.getMessage());
+
         }
     }
 

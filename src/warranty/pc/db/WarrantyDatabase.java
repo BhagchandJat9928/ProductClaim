@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class WarrantyDatabase {
 
     private static final Logger LOGGER = Logger.getLogger(WarrantyDatabase.class.getName());
-    private static final String CONN_FACTORY_CLASS_NAME = "com.mysql.jdbc.Driver"; //"oracle.jdbc.pool.OracleDataSource";
+    private static final String CONN_FACTORY_CLASS_NAME = "com.mysql.cj.jdbc.Driver"; //"oracle.jdbc.pool.OracleDataSource";
     private Connection conn;
 
     public WarrantyDatabase(String dbURL, String username, String password) throws Exception {
@@ -53,13 +53,21 @@ public class WarrantyDatabase {
             Class.forName(CONN_FACTORY_CLASS_NAME);
             conn = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
 
-            String createTable = "create table Claim if not exists(CLAIM_ID varchar(50),CUSTOMER_ID  varchar(50),"
-                    + "CUTOMER_FIRSTNAME varchar(50),CUSTOMER_LASTNAME varchar(50),"
-                    + "CUTOMER_EMAIL,PRODUCT_ID varchar(50),PRODUCT_NAME varchar(50),SERIAL_NUMBER varchar(50),"
-                    + "WARRANTY_NUMBER integer,COUNTRY_CODE varchar(50),COUNTRY_REGION varchar(50),STATUS varchar(50),"
-                    + "CLAIM_DATE Date,SUBJECT varchar(50),SUMMARY varchar(50))";
-            PreparedStatement st = conn.prepareStatement(createTable);
-            st.execute();
+            String claimTable = "create table if not exists Claim(CLAIM_ID int AUTO_INCREMENT PRIMARY KEY ,CUSTOMER_ID  varchar(50) NOT NULL,"
+                    + "CUTOMER_FIRSTNAME varchar(50) NOT NULL,CUSTOMER_LASTNAME varchar(50) NOT NULL,"
+                    + "CUTOMER_EMAIL varchar(50) NOT NULL,PRODUCT_ID varchar(50)NOT NULL,PRODUCT_NAME varchar(50) NOT NULL,SERIAL_NUMBER varchar(50) NOT NULL,"
+                    + "WARRANTY_NUMBER int NOT NULL,COUNTRY_CODE varchar(50) NOT NULL,COUNTRY_REGION varchar(50) NOT NULL,STATUS varchar(50) NOT NULL,"
+                    + "CLAIM_DATE Date NOT NULL,SUBJECT varchar(50) NOT NULL,SUMMARY varchar(50) NOT NULL)";
+            PreparedStatement claim = conn.prepareStatement(claimTable);
+            claim.execute();
+            LOGGER.info("Claim Table Created Successfully");
+            String warrantyTable = "create table if not exists Warranty(productId int NOT NULL PRIMARY KEY,"
+                    + "serialNumber varchar(20) NOT NULL,warrantyNumber int NOT NULL,"
+                    + "dateOpened Date NOT NULL,expiryDate Date NOT NULL)";
+            PreparedStatement warranty = conn.prepareStatement(warrantyTable);
+            warranty.execute();
+
+            LOGGER.info("Warranty Table Created Successfully");
 
 //            pds.setConnectionFactoryClassName(CONN_FACTORY_CLASS_NAME);
 //

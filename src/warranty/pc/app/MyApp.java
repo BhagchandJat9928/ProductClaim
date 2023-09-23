@@ -24,6 +24,9 @@ import warranty.pc.rest.ManufacturingClient;
 public class MyApp {
 
     private static final Logger LOGGER = Logger.getLogger(MyApp.class.getName());
+    static String path = Thread.currentThread().getContextClassLoader()
+            .getResource("resources.properties").getPath().replace("classes/resources.properties", "")
+            .replaceFirst("/", "");
 
     private static final String CLAIM_BATCH_FILE_NAME = "app.claims.batch.file";
     private final static String BAD_FORMAT_OUTPUT = "app.bad.format.output";
@@ -41,19 +44,22 @@ public class MyApp {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
+        LOGGER.log(Level.INFO, "build Path {0}", path);
+
         try {
             Properties config = AppConfiguration.getConfig();
-            System.out.println("hello");
+
             ClaimFileReader claimReader = new ClaimFileReader(config.getProperty(CSV_DATA_FORMAT));
-            List<Claim> claimList = claimReader.readClaims(config.getProperty(CLAIM_BATCH_FILE_NAME));
+            List<Claim> claimList = claimReader.readClaims(path + config.getProperty(CLAIM_BATCH_FILE_NAME));
 
             ClaimFileWriter claimWriter = new ClaimFileWriter();
             claimWriter.writeInvalidFormat(claimReader.getFailedRecords(),
-                    config.getProperty(BAD_FORMAT_OUTPUT),
-                    config.getProperty(BAD_FORMAT_FN_PREFIX));
+                    path + config.getProperty(BAD_FORMAT_OUTPUT),
+                    path + config.getProperty(BAD_FORMAT_FN_PREFIX));
 
             LOGGER.log(Level.INFO, "{0} claims found in {1}",
-                    new Object[]{claimList.size(), config.getProperty(CLAIM_BATCH_FILE_NAME)});
+                    new Object[]{claimList.size(), path + config.getProperty(CLAIM_BATCH_FILE_NAME)});
 
             System.out.println("---Total of Claims processed from CSV file: " + claimList.size() + " ----");
 
@@ -64,7 +70,7 @@ public class MyApp {
 
             List<Claim> validClaims = validator.validate(claimList);
             claimWriter.writeInvalidWarranty(validator.getInvalidWarrantyClaims(),
-                    config.getProperty(INVALID_WARRANTY_OUTPUT),
+                    path + config.getProperty(INVALID_WARRANTY_OUTPUT),
                     config.getProperty(INVALID_WARRANTY_FN_PREFIX));
             LOGGER.log(Level.INFO, "{0} claims have a valid warranty ", validClaims.size());
             System.out.println("--- Claims with a valid warranty: " + validClaims.size());

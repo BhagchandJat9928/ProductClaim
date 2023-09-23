@@ -71,6 +71,7 @@ public class ManufacturingClient {
         } catch (Exception ex) {
             restErrors = true;
             LOGGER.log(Level.WARNING, "Problem invoking the REST endpoint: {0}", endpoint);
+            //  ex.printStackTrace();
         }
         return country;
     }

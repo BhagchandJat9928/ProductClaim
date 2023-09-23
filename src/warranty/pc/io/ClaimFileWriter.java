@@ -19,10 +19,10 @@ package warranty.pc.io;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,75 +34,77 @@ import warranty.pc.model.Claim;
  * @author bhagc
  */
 public class ClaimFileWriter {
-    private static final Logger LOGGER=Logger.getLogger(ClaimFileWriter.class.getName());
-    
-    public void writeInvalidFormat(List<String> claimRecords,String filePath,String fileName)throws Exception{
-      
-        if(claimRecords==null || filePath==null || filePath.isBlank() || fileName==null){
-            throw new Exception("Not enough information to write claim records to a file: "+fileName+" within the directory: "+filePath);
+
+    private static final Logger LOGGER = Logger.getLogger(ClaimFileWriter.class.getName());
+
+    public void writeInvalidFormat(List<String> claimRecords, String filePath, String fileName) throws Exception {
+
+        if (claimRecords == null || filePath == null || filePath.isBlank() || fileName == null) {
+            throw new Exception("Not enough information to write claim records to a file: " + fileName + " within the directory: " + filePath);
         }
-          //avoid creating an empty file
-        if(claimRecords.isEmpty()){
+        //avoid creating an empty file
+        if (claimRecords.isEmpty()) {
             return;
         }
-        
-        String path=getOutputFileName(filePath,fileName);
-        try(BufferedWriter writer=new BufferedWriter(new FileWriter(path))){
-            claimRecords.forEach(line->{
+
+        String path = getOutputFileName(filePath, fileName);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            claimRecords.forEach(line -> {
                 try {
                     writer.write(line);
                     writer.write("\n");
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, "Problem writing record: {0}",line);
+                    LOGGER.log(Level.WARNING, "Problem writing record: {0}", line);
                     LOGGER.log(Level.WARNING, ex.getMessage());
                 }
             });
-        }catch(IOException ex){
-            LOGGER.log(Level.WARNING,ex.getMessage());
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
     }
-    
-    public void writeInvalidWarranty(List<Claim> claimRecords,String filePath,String fileName)throws Exception{
-        if(claimRecords==null || filePath==null || filePath.isBlank() || fileName==null){
-            throw new Exception("Not enough information to write invalid claim records to a file: "+fileName+" within the directory: "+filePath);
+
+    public void writeInvalidWarranty(List<Claim> claimRecords, String filePath, String fileName) throws Exception {
+        if (claimRecords == null || filePath == null || filePath.isBlank() || fileName == null) {
+            throw new Exception("Not enough information to write invalid claim records to a file: " + fileName + " within the directory: " + filePath);
         }
-          //avoid creating an empty file
-        if(claimRecords.isEmpty()){
+        //avoid creating an empty file
+        if (claimRecords.isEmpty()) {
             return;
         }
-        
-        String path=getOutputFileName(filePath,fileName);
-        try(BufferedWriter writer=new BufferedWriter(new FileWriter(path))){
-            claimRecords.forEach(claim->{
+
+        String path = getOutputFileName(filePath, fileName);
+
+        try (BufferedWriter writer
+                            = Files.newBufferedWriter(Path.of(path),
+                        Charset.forName("UTF-8"),
+                        StandardOpenOption.CREATE_NEW)) {
+
+            claimRecords.forEach(claim -> {
+
                 try {
-                    LOGGER.log(Level.FINEST,"Saving claim with invalid Warranty: {0}",claim);
+                    LOGGER.log(Level.FINEST, "Saving claim with invalid Warranty: {0}", claim);
                     writer.write(claim.toString());
                     writer.write("\n");
+                    LOGGER.info("invalid Warranty Claim saved ");
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, "Problem writing claim: {0}",claim);
+                    LOGGER.log(Level.WARNING, "Problem writing claim: {0}", claim);
                     LOGGER.log(Level.WARNING, ex.getMessage());
                 }
             });
-        }catch(IOException ex){
-            LOGGER.log(Level.WARNING,ex.getMessage());
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, ex.getMessage());
         }
-        
-        
+
     }
-    
-    private String getOutputFileName(String filePath,String fileName){
-        StringBuilder sb=new StringBuilder();
-        sb.append(filePath);
-        String seperator=FileSystems.getDefault().getSeparator();
-        if(filePath.endsWith(seperator)){
-            sb.append(fileName);
-        }else{
-              sb.append(seperator);
-              sb.append(fileName);
-        }
+
+    private String getOutputFileName(String filePath, String fileName) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(filePath).append("/").append(fileName);
         sb.append(Calendar.getInstance().getTimeInMillis());
-       sb.append(".txt");
+        sb.append(".txt");
+
         return sb.toString();
     }
-    
+
 }

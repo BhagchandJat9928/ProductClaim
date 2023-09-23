@@ -19,7 +19,7 @@ module ProductClaim {
     requires java.logging;
     requires java.sql;
     requires java.ws.rs ;
-    requires spring.webmvc;
+    
 
 
 }

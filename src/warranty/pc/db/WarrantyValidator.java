@@ -54,7 +54,7 @@ public class WarrantyValidator {
         List<Claim> validWarranty = new ArrayList<>();
         invalidWarrantyClaims = new ArrayList<>();
         claimList.forEach(claim -> {
-            Warranty w = this.queryWarranty(claim.getProductId(), claim.getSerialNumber());
+            Warranty w = this.queryWarranty(claim.getProductId(), claim.getSerialNumber(), claim.getClaimDate());
 
             if (w != null && w.isVaild()) {
                 validWarranty.add(claim);
@@ -67,10 +67,11 @@ public class WarrantyValidator {
         return validWarranty;
     }
 
-    private Warranty queryWarranty(Integer productId, String serialNumber) {
-        String sqlQuery = "select * from Warranty where id= ? And serialNumber= ?";
+    private Warranty queryWarranty(Integer productId, String serialNumber, LocalDate date) {
+        String sqlQuery = "select * from Warranty where productId= ? And serialNumber= ?";
         Warranty warranty = findWarranty(sqlQuery, productId, serialNumber);
-        if (warranty != null && warranty.getExpiryDate().isAfter(LocalDate.now())) {
+        if (warranty != null && warranty.getExpiryDate().isAfter(date)
+                && warranty.getDateOpened().isBefore(date)) {
             warranty.setVaild(true);
         }
         return warranty;
@@ -84,7 +85,9 @@ public class WarrantyValidator {
             st.setInt(1, productId);
             st.setString(2, serialNumber);
             ResultSet result = st.executeQuery();
+
             while (result.next()) {
+
                 warranty.setProductId(result.getInt(1));
                 warranty.setSerialNumber(result.getString(2));
                 warranty.setWarrantyNumber(result.getInt(3));
@@ -94,7 +97,7 @@ public class WarrantyValidator {
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.WARNING, "Problem finding a warranty for ProductId:{0} and serial Number: {1}", new Object[]{productId, serialNumber});
-            LOGGER.log(Level.WARNING, ex.getMessage());
+            LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         return null;
     }
